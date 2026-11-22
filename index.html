@@ -13,8 +13,12 @@
 html[data-pal=burgundy]{--a:#a3223f}html[data-pal=emerald]{--a:#059669}html[data-pal=sunset]{--a:#ea580c}html[data-pal=pink]{--a:#db2777}html[data-pal=graphite]{--a:#475569}
 html[data-mode=dark]{--bg:#0a0e16;--sf:#131a26;--sf2:#1a2332;--tx:#e8edf6;--mut:#8b96a9;--line:#212b3c;--a:#38bdf8;--on:#04131d;--sh:0 8px 30px rgba(0,0,0,.35);color-scheme:dark}
 html[data-mode=dark][data-pal=burgundy]{--a:#d9486e;--on:#fff}html[data-mode=dark][data-pal=emerald]{--a:#34d399;--on:#03170f}html[data-mode=dark][data-pal=sunset]{--a:#fb923c;--on:#1c0a02}html[data-mode=dark][data-pal=pink]{--a:#f472b6;--on:#1f0613}html[data-mode=dark][data-pal=graphite]{--a:#94a3b8;--on:#0b1220}
+html[data-mode=light]{--bg:color-mix(in srgb,var(--a) 9%,#f7f9fc);--sf2:color-mix(in srgb,var(--a) 8%,#eef1f5)}
+html[data-mode=dark]{--bg:color-mix(in srgb,var(--a) 10%,#05070c);--sf:color-mix(in srgb,var(--a) 7%,#0e141d);--sf2:color-mix(in srgb,var(--a) 11%,#161d29);--line:color-mix(in srgb,var(--a) 15%,#1c2431)}
+body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(120% 70% at 85% -8%,color-mix(in srgb,var(--a) 42%,transparent),transparent 62%),radial-gradient(90% 60% at -10% 105%,color-mix(in srgb,var(--a) 26%,transparent),transparent 58%)}
+html[data-mode=light] body:before{background:radial-gradient(120% 70% at 85% -8%,color-mix(in srgb,var(--a) 26%,transparent),transparent 62%),radial-gradient(90% 60% at -10% 105%,color-mix(in srgb,var(--a) 16%,transparent),transparent 58%)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 "Plus Jakarta Sans",Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+html{background:var(--bg)}html,body{margin:0;color:var(--tx);font:15px/1.45 "Plus Jakarta Sans",Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
 body{max-width:480px;margin:0 auto;min-height:100vh;transition:background .3s}
 .hide{display:none!important}button,input,select{font:inherit;color:inherit}button{cursor:pointer}
 input,select{width:100%;min-height:50px;border:1.5px solid var(--line);border-radius:18px;padding:0 16px;background:var(--sf);outline:none;transition:.2s}
@@ -98,7 +102,7 @@ const PALS=[['sky','Sky','#0ea5e9'],['burgundy','Burgundy','#a3223f'],['emerald'
 const MN={id:['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'],en:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']};
 
 let API=localStorage.api||'',TOK=localStorage.tok||'',D=L('d'),Q=L('q')||[],tab='home',per='bulan',cf='',ct='',busy=false,F={},AIP=null,YES=null,tb='target',dj='keluar',H={q:'',w:'',k:'',a:'',b:''};
-let cfg=Object.assign({mode:'auto',pal:'sky',lang:'id',name:'aak azki',hide:false},L('cfg')||{});
+let cfg=Object.assign({mode:'dark',pal:'sky',lang:'id',name:'aak azki',hide:false},L('cfg')||{});
 const saveCfg=()=>SV('cfg',cfg);
 const EN={};`Catat uang dari HP, tersimpan di Google Sheets-mu.|Track your money from your phone, saved to your Google Sheets.
 URL Apps Script (akhiran /exec)|Apps Script URL (ends with /exec)
@@ -273,11 +277,15 @@ Scan struk butuh internet|Receipt scan needs internet
 Memuat ulang…|Reloading…
 Dompet asal/tujuan belum jelas|Source/target wallet unclear
 Foto tidak bisa dibaca|Can't read the photo
-Gagal|Failed`.split('\n').forEach(l=>{const q=l.split('|');if(q[1])EN[q[0]]=q[1]});
+Gagal|Failed
+Backend belum diperbarui. Di Apps Script: Terapkan → Kelola deployment → Versi baru.|Backend is outdated. In Apps Script: Deploy → Manage deployments → New version.
+Backend Apps Script belum versi terbaru (scan struk dan anggaran butuh update)|Apps Script backend is outdated (receipt scan and budgets need the update)
+Backend terbaru ✓|Backend up to date ✓
+⚠️ Backend lama: perbarui Apps Script|⚠️ Outdated backend: update Apps Script`.split('\n').forEach(l=>{const q=l.split('|');if(q[1])EN[q[0]]=q[1]});
 let RE=null;
 const tr=h=>{if(cfg.lang!=='en')return h;if(!RE)RE=new RegExp(Object.keys(EN).sort((a,b)=>b.length-a.length).map(k=>(/^\w/.test(k)?'\\b':'')+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+(/\w$/.test(k)?'\\b':'')).join('|'),'g');return String(h).replace(RE,m=>EN[m])};
 if(typeof Element!=='undefined'){const d=Object.getOwnPropertyDescriptor(Element.prototype,'innerHTML');if(d)Object.defineProperty(Element.prototype,'innerHTML',{get:d.get,set(v){d.set.call(this,tr(v))},configurable:true})}
-function applyCfg(){const r=document.documentElement,mq=matchMedia('(prefers-color-scheme: dark)'),dk=cfg.mode==='dark'||(cfg.mode==='auto'&&mq.matches);r.dataset.mode=dk?'dark':'light';r.dataset.pal=cfg.pal;r.lang=cfg.lang;const m=document.querySelector('meta[name=theme-color]');if(m)m.content=dk?'#0a0e16':'#f4f6f9'}
+function applyCfg(){const r=document.documentElement,mq=matchMedia('(prefers-color-scheme: dark)'),dk=cfg.mode==='dark'||(cfg.mode==='auto'&&mq.matches);r.dataset.mode=dk?'dark':'light';r.dataset.pal=cfg.pal;r.lang=cfg.lang;const m=document.querySelector('meta[name=theme-color]');if(m)m.content=dk?'#05070c':'#f4f6f9'}
 try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>cfg.mode==='auto'&&applyCfg())}catch(e){}
 const ey=h=>`<svg viewBox="0 0 24 24" class="ey">${h?'<path d="M3 3l18 18M10.6 6.1A9.8 9.8 0 0 1 12 6c5 0 8.5 4 9.5 6a14 14 0 0 1-2.3 3M6.6 6.7C4.4 8.1 3 10.4 2.5 12c1 2 4.5 6 9.5 6 1.4 0 2.6-.3 3.7-.8M9.9 9.9a3 3 0 0 0 4.2 4.2"/>':'<path d="M2.5 12C3.5 10 7 6 12 6s8.5 4 9.5 6c-1 2-4.5 6-9.5 6s-8.5-4-9.5-6z"/><circle cx="12" cy="12" r="3"/>'}</svg>`;
 const bal=n=>cfg.hide?'Rp ••••••':rp(n);
@@ -289,7 +297,7 @@ function chrome(){
 
 /* ---------- jaringan & antrean ---------- */
 async function api(b){const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...b,token:TOK})});return r.json()}
-const nerr=e=>/fetch|network|load failed/i.test(e.message||'')?'Tidak ada sinyal / server tidak terjangkau':(e.message||'Gagal')
+const nerr=e=>{const m=e.message||'';return/Aksi tidak dikenal/i.test(m)?'Backend belum diperbarui. Di Apps Script: Terapkan → Kelola deployment → Versi baru.':/fetch|network|load failed/i.test(m)?'Tidak ada sinyal / server tidak terjangkau':(m||'Gagal')};
 function status(){const p=$('#st');if(!p)return;let c='ok',t='Tersinkron';if(busy){c='sy';t='Menyimpan…'}else if(Q.length){c='q';t='Antre '+Q.length}else if(!navigator.onLine){c='off';t='Offline'}p.className='pill '+c;p.textContent=tr(t)}
 function enqueue(j){Q.push(j);SV('q',Q);status();flush()}
 async function flush(){
@@ -392,7 +400,7 @@ function setForm(){openSheet(`<h3>Pengaturan</h3><label>Nama panggilan</label><i
 <label>Tampilan</label><div class="seg">${[['light','Terang'],['dark','Gelap'],['auto','Otomatis']].map(([k,l])=>`<button data-a="cfg" data-k="mode" data-v="${k}" class="${cfg.mode===k?'on':''}">${l}</button>`).join('')}</div>
 <label>Palet warna</label><div class="pal">${PALS.map(([k,l,c])=>`<button class="sw ${cfg.pal===k?'on':''}" style="--c:${c}" data-a="cfg" data-k="pal" data-v="${k}" title="${l}"></button>`).join('')}</div>
 <label>Bahasa</label><div class="seg"><button data-a="cfg" data-k="lang" data-v="id" class="${cfg.lang==='id'?'on':''}">Indonesia</button><button data-a="cfg" data-k="lang" data-v="en" class="${cfg.lang==='en'?'on':''}">English</button></div>
-<div class="two" style="margin-top:6px"><button class="sm" data-a="refresh">↻ Muat ulang</button><button class="sm" style="color:var(--out)" data-a="out">Keluar akun</button></div>`,'Tutup')}
+<small>${BV===null?'':BV>=3?'Backend terbaru ✓':'⚠️ Backend lama: perbarui Apps Script'}</small><div class="two" style="margin-top:6px"><button class="sm" data-a="refresh">↻ Muat ulang</button><button class="sm" style="color:var(--out)" data-a="out">Keluar akun</button></div>`,'Tutup')}
 function render(){
   if(!D){$('#main').innerHTML='<div class="sk"></div><div class="sk"></div><div class="sk"></div>';return}
   const V={home:vHome,lap:vLap,his:vHis,wal:vWal,tar:vTar},TT={lap:'Laporan',his:'Riwayat',wal:'Dompet',tar:'Rencana'};
@@ -473,6 +481,8 @@ document.addEventListener('input',e=>{const t=e.target;if(t.classList.contains('
   const k=t.dataset.h;if(!k)return;if(k==='nm'){cfg.name=t.value;saveCfg();return}if(k==='cf'){cf=t.value;render()}else if(k==='ct'){ct=t.value;render()}else{H[k]=t.value;list()}});
 document.addEventListener('keydown',e=>{if(e.key==='Enter'){if(e.target.id==='ai')A.ask();if(e.target.id==='lp')A.login()}});
 
+let BV=null;
+async function chkBackend(){try{const r=await api({action:'ping'});BV=r.v||0}catch(e){return}if(BV<3)toast('Backend Apps Script belum versi terbaru (scan struk dan anggaran butuh update)','err')}
 function shrink(f){return new Promise((ok,no)=>{const im=new Image(),u=URL.createObjectURL(f);im.onload=()=>{const s=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c.toDataURL('image/jpeg',.8).split(',')[1])};im.onerror=()=>no(new Error('Foto tidak bisa dibaca'));im.src=u})}
 async function scan(f,inp){if(!f)return;if(!navigator.onLine){inp.value='';return toast('Scan struk butuh internet','err')}
   $('#pv').innerHTML='<div class="pvc">⏳ Membaca struk…</div>';
@@ -480,7 +490,7 @@ async function scan(f,inp){if(!f)return;if(!navigator.onLine){inp.value='';retur
 document.addEventListener('change',e=>{if(e.target.id==='rc')scan(e.target.files[0],e.target)});
 /* ---------- mulai ---------- */
 function logout(m){TOK='';localStorage.removeItem('tok');localStorage.removeItem('d');D=null;Q=[];SV('q',Q);closeSheet();$('#shell').classList.add('hide');$('#login').classList.remove('hide');$('#lu').value=API;if(m)toast(m,'err')}
-function start(){$('#login').classList.add('hide');$('#shell').classList.remove('hide');render();Q.length?flush():refresh()}
+function start(){$('#login').classList.add('hide');$('#shell').classList.remove('hide');render();Q.length?flush():refresh();chkBackend()}
 applyCfg();chrome();
 if(API&&TOK)start();else $('#login').classList.remove('hide');
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
